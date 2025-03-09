@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Видео Чат</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .video-container {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .chat-container {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+
+        #videoElement {
+            width: 100%;
+            max-width: 640px;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background-color: #000;
+        }
+
+        .controls {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .status {
+            margin-top: 10px;
+            color: #666;
+        }
+
+        #chatMessages {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .message.received {
+            background-color: #e9ecef;
+            align-self: flex-start;
+        }
+
+        .message.sent {
+            background-color: #007bff;
+            color: white;
+            align-self: flex-end;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        #messageInput {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        #sendButton {
+            padding: 10px 20px;
+            margin: 0;
+        }
+
+        .username-container {
+            margin-bottom: 15px;
+        }
+
+        #usernameInput {
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="video-container">
+            <video id="videoElement" autoplay playsinline></video>
+            <div class="controls">
+                <button id="startButton">Включить камеру</button>
+                <button id="stopButton" disabled>Выключить камеру</button>
+                <button id="switchButton" disabled>Сменить камеру</button>
+            </div>
+            <div id="status" class="status"></div>
+        </div>
+
+        <div class="chat-container">
+            <div class="username-container">
+                <input type="text" id="usernameInput" placeholder="Введите ваше имя">
+                <button id="setUsernameButton">Установить имя</button>
+            </div>
+            <div id="chatMessages"></div>
+            <div class="chat-input-container">
+                <input type="text" id="messageInput" placeholder="Введите сообщение...">
+                <button id="sendButton">Отправить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStream = null;
+        let currentFacingMode = 'user';
+        let username = '';
+
+        const videoElement = document.getElementById('videoElement');
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const switchButton = document.getElementById('switchButton');
+        const statusElement = document.getElementById('status');
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const usernameInput = document.getElementById('usernameInput');
+        const setUsernameButton = document.getElementById('setUsernameButton');
+
+        // WebSocket подключение
+        const ws = new WebSocket('wss://ваш-сервер-здесь');
+
+        ws.onopen = () => {
+            console.log('WebSocket подключен');
+            addSystemMessage('Подключено к чату');
+        };
+
+        ws.onmessage = (event) => {
+            const message = JSON.parse(event.data);
+            addMessage(message.username, message.text, false);
+        };
+
+        ws.onclose = () => {
+            console.log('WebSocket отключен');
+            addSystemMessage('Отключено от чата');
+        };
+
+        // Функции камеры
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            statusElement.textContent = 'Камера не поддерживается в вашем браузере';
+            startButton.disabled = true;
+        }
+
+        async function startCamera() {
+            try {
+                const constraints = {
+                    video: { facingMode: currentFacingMode }
+                };
+
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                videoElement.srcObject = currentStream;
+                
+                startButton.disabled = true;
+                stopButton.disabled = false;
+                switchButton.disabled = false;
+                statusElement.textContent = 'Камера включена';
+
+            } catch (err) {
+                statusElement.textContent = `Ошибка: ${err.message}`;
+                console.error("Ошибка доступа к камере:", err);
+            }
+        }
+
+        function stopCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                videoElement.srcObject = null;
+                currentStream = null;
+                
+                startButton.disabled = false;
+                stopButton.disabled = true;
+                switchButton.disabled = true;
+                statusElement.textContent = 'Камера выключена';
+            }
+        }
+
+        async function switchCamera() {
+            currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+            stopCamera();
+            await startCamera();
+        }
+
+        // Функции чата
+        function addMessage(username, text, isSent = true) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+            messageDiv.textContent = `${username}: ${text}`;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addSystemMessage(text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message system';
+            messageDiv.style.color = '#666';
+            messageDiv.textContent = text;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            if (text && username) {
+                const message = {
+                    username: username,
+                    text: text
+                };
+                ws.send(JSON.stringify(message));
+                addMessage(username, text);
+                messageInput.value = '';
+            }
+        }
+
+        // Обработчики событий
+        startButton.addEventListener('click', startCamera);
+        stopButton.addEventListener('click', stopCamera);
+        switchButton.addEventListener('click', switchCamera);
+
+        setUsernameButton.addEventListener('click', () => {
+            const newUsername = usernameInput.value.trim();
+            if (newUsername) {
+                username = newUsername;
+                usernameInput.disabled = true;
+                setUsernameButton.disabled = true;
+                addSystemMessage(`Имя установлено: ${username}`);
+            }
+        });
+
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Очистка при закрытии страницы
+        window.addEventListener('beforeunload', () => {
+            stopCamera();
+            ws.close();
+        });
+    </script>
+</body>
+</html>
