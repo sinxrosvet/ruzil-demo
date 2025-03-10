@@ -34,29 +34,27 @@
         .download-button {
             position: fixed;
             bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #FF3B30;
+            right: 20px; /* Изменено с left: 50% */
+            transform: none; /* Убрано translateX */
+            background: #007AFF; /* Синий цвет */
             color: white;
             border: none;
-            border-radius: 30px;
-            padding: 15px 40px;
-            font-size: 18px;
-            font-weight: bold;
+            border-radius: 20px;
+            padding: 10px 20px; /* Уменьшен padding */
+            font-size: 14px; /* Уменьшен размер шрифта */
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 59, 48, 0.4);
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             z-index: 1000;
             transition: all 0.3s ease;
         }
         .download-button:hover {
-            background: #FF625A;
-            transform: translateX(-50%) scale(1.05);
+            background: #0066CC;
         }
         .download-button:active {
-            transform: translateX(-50%) scale(0.95);
+            transform: scale(0.95);
         }
     </style>
 </head>
@@ -77,7 +75,7 @@
     </div>
 
     <button class="download-button" onclick="downloadPage()">
-        📥 Скачать галерею
+        📥 Скачать файл
     </button>
 
     <script>
@@ -85,7 +83,6 @@
         let startDistance = 0;
         let isScaling = false;
         
-        // Функция для конвертации изображения в Data URL
         async function imageToDataURL(img) {
             const canvas = document.createElement('canvas');
             canvas.width = img.naturalWidth;
@@ -95,10 +92,8 @@
             return canvas.toDataURL('image/jpeg');
         }
 
-        // Функция для скачивания страницы со встроенными изображениями
         async function downloadPage() {
             try {
-                // Ждем загрузки всех изображений
                 const images = document.querySelectorAll('img');
                 for (let img of images) {
                     if (!img.complete) {
