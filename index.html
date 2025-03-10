@@ -19,6 +19,7 @@
             max-width: 800px;
             margin: 20px auto;
             padding: 0 20px;
+            padding-bottom: 80px;
         }
         .image-wrapper {
             margin-bottom: 20px;
@@ -30,26 +31,32 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             display: block;
         }
-        /* Стили для кнопки скачивания */
         .download-button {
             position: fixed;
             bottom: 20px;
-            right: 20px;
-            background: #007AFF;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #FF3B30;
             color: white;
             border: none;
-            border-radius: 25px;
-            padding: 12px 24px;
-            font-size: 16px;
+            border-radius: 30px;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(255, 59, 48, 0.4);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             z-index: 1000;
+            transition: all 0.3s ease;
         }
         .download-button:hover {
-            background: #0056b3;
+            background: #FF625A;
+            transform: translateX(-50%) scale(1.05);
+        }
+        .download-button:active {
+            transform: translateX(-50%) scale(0.95);
         }
     </style>
 </head>
@@ -70,7 +77,7 @@
     </div>
 
     <button class="download-button" onclick="downloadPage()">
-        📥 Скачать файл себе на устройство
+        📥 Скачать галерею
     </button>
 
     <script>
@@ -78,18 +85,43 @@
         let startDistance = 0;
         let isScaling = false;
         
-        // Функция для скачивания HTML страницы
-        function downloadPage() {
-            const htmlContent = document.documentElement.outerHTML;
-            const blob = new Blob([htmlContent], { type: 'text/html' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'gallery.html';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
+        // Функция для конвертации изображения в Data URL
+        async function imageToDataURL(img) {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            return canvas.toDataURL('image/jpeg');
+        }
+
+        // Функция для скачивания страницы со встроенными изображениями
+        async function downloadPage() {
+            try {
+                // Ждем загрузки всех изображений
+                const images = document.querySelectorAll('img');
+                for (let img of images) {
+                    if (!img.complete) {
+                        await new Promise(resolve => img.onload = resolve);
+                    }
+                    const dataUrl = await imageToDataURL(img);
+                    img.setAttribute('src', dataUrl);
+                }
+
+                const htmlContent = document.documentElement.outerHTML;
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'gallery.html';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Ошибка при скачивании:', error);
+                alert('Не удалось скачать галерею');
+            }
         }
 
         document.addEventListener('touchstart', function(e) {
