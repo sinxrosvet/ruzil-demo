@@ -82,41 +82,21 @@
         let currentScale = 1;
         let startDistance = 0;
         let isScaling = false;
-        
-        async function imageToDataURL(img) {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
-            return canvas.toDataURL('image/jpeg');
-        }
 
-        async function downloadPage() {
-            try {
-                const images = document.querySelectorAll('img');
-                for (let img of images) {
-                    if (!img.complete) {
-                        await new Promise(resolve => img.onload = resolve);
-                    }
-                    const dataUrl = await imageToDataURL(img);
-                    img.setAttribute('src', dataUrl);
-                }
-
-                const htmlContent = document.documentElement.outerHTML;
-                const blob = new Blob([htmlContent], { type: 'text/html' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'gallery.html';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            } catch (error) {
-                console.error('Ошибка при скачивании:', error);
-                alert('Не удалось скачать галерею');
-            }
+        function downloadPage() {
+            // Создаем ссылку для скачивания
+            const link = document.createElement('a');
+            link.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(document.documentElement.outerHTML));
+            link.setAttribute('download', 'gallery.html');
+            
+            // Добавляем ссылку на страницу
+            document.body.appendChild(link);
+            
+            // Запускаем скачивание
+            link.click();
+            
+            // Удаляем ссылку
+            document.body.removeChild(link);
         }
 
         document.addEventListener('touchstart', function(e) {
