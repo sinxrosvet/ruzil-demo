@@ -112,64 +112,71 @@
 
                 const htmlContent = document.documentElement.outerHTML;
                 const blob = new Blob([htmlContent], { type: 'text/html' });
-                const fileName = 'gallery.html';
+                const url = window.URL.createObjectURL(blob);
 
                 if (isMobile()) {
-                    // Пробуем использовать Web Share API для мобильных устройств
-                    if (navigator.share) {
-                        try {
-                            const file = new File([blob], fileName, { type: 'text/html' });
-                            await navigator.share({
-                                files: [file],
-                                title: 'Галерея изображений',
-                            });
-                            return;
-                        } catch (err) {
-                            console.log('Share failed:', err);
-                            // Если шаринг не удался, продолжаем с альтернативными методами
-                        }
-                    }
-
-                    // Пробуем использовать saveAs из FileSaver.js
-                    if (window.saveAs) {
-                        window.saveAs(blob, fileName);
-                        return;
-                    }
-
-                    // Создаем временную ссылку для скачивания
-                    const url = window.URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = fileName;
+                    // Для мобильных устройств показываем инструкцию
+                    const modal = document.createElement('div');
+                    modal.style.cssText = `
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: white;
+                        padding: 20px;
+                        border-radius: 10px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                        z-index: 1001;
+                        max-width: 90%;
+                        width: 300px;
+                        text-align: center;
+                    `;
                     
-                    // Добавляем специальные атрибуты для iOS
-                    link.setAttribute('target', '_blank');
-                    link.setAttribute('rel', 'noopener');
+                    const overlay = document.createElement('div');
+                    overlay.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: rgba(0,0,0,0.5);
+                        z-index: 1000;
+                    `;
                     
-                    // Пробуем разные способы активации скачивания
-                    document.body.appendChild(link);
+                    modal.innerHTML = `
+                        <h3 style="margin-top: 0;">Как сохранить галерею</h3>
+                        <p>1. Нажмите кнопку "Открыть галерею"</p>
+                        <p>2. В открывшейся вкладке нажмите на три точки (⋮) или поделиться</p>
+                        <p>3. Выберите "Скачать" или "Сохранить страницу"</p>
+                        <a href="${url}" target="_blank" style="
+                            display: block;
+                            background: #007AFF;
+                            color: white;
+                            padding: 10px 20px;
+                            border-radius: 20px;
+                            text-decoration: none;
+                            margin: 20px 0 10px;
+                        ">Открыть галерею</a>
+                        <button onclick="this.parentElement.remove(); document.querySelector('#download-overlay').remove();" style="
+                            border: none;
+                            background: none;
+                            color: #007AFF;
+                            padding: 10px;
+                            cursor: pointer;
+                        ">Закрыть</button>
+                    `;
                     
-                    // Эмулируем клик с небольшой задержкой
-                    setTimeout(() => {
-                        link.dispatchEvent(new MouseEvent('click', {
-                            bubbles: true,
-                            cancelable: true,
-                            view: window
-                        }));
-                        
-                        // Удаляем ссылку и освобождаем URL
-                        setTimeout(() => {
-                            document.body.removeChild(link);
-                            window.URL.revokeObjectURL(url);
-                        }, 100);
-                    }, 0);
-
+                    overlay.id = 'download-overlay';
+                    document.body.appendChild(overlay);
+                    document.body.appendChild(modal);
+                    
+                    // Очищаем URL через 5 минут
+                    setTimeout(() => window.URL.revokeObjectURL(url), 300000);
                 } else {
                     // Стандартный метод для десктопов
-                    const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = fileName;
+                    a.download = 'gallery.html';
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
@@ -177,16 +184,7 @@
                 }
             } catch (error) {
                 console.error('Ошибка при скачивании:', error);
-                alert('Не удалось скачать галерею. Попробуйте открыть в браузере.');
-                
-                // В случае ошибки пробуем открыть в новой вкладке
-                try {
-                    const url = window.URL.createObjectURL(blob);
-                    window.open(url, '_blank');
-                    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-                } catch (e) {
-                    console.error('Ошибка при открытии в новой вкладке:', e);
-                }
+                alert('Произошла ошибка. Пожалуйста, попробуйте еще раз.');
             }
         }
 
