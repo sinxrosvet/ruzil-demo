@@ -34,14 +34,14 @@
         .download-button {
             position: fixed;
             bottom: 20px;
-            right: 20px; /* Изменено с left: 50% */
-            transform: none; /* Убрано translateX */
-            background: #007AFF; /* Синий цвет */
+            right: 20px;
+            transform: none;
+            background: #007AFF;
             color: white;
             border: none;
             border-radius: 20px;
-            padding: 10px 20px; /* Уменьшен padding */
-            font-size: 14px; /* Уменьшен размер шрифта */
+            padding: 10px 20px;
+            font-size: 14px;
             cursor: pointer;
             box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
             display: flex;
@@ -49,6 +49,7 @@
             gap: 8px;
             z-index: 1000;
             transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
         }
         .download-button:hover {
             background: #0066CC;
@@ -83,20 +84,110 @@
         let startDistance = 0;
         let isScaling = false;
 
-        function downloadPage() {
-            // Создаем ссылку для скачивания
-            const link = document.createElement('a');
-            link.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(document.documentElement.outerHTML));
-            link.setAttribute('download', 'gallery.html');
-            
-            // Добавляем ссылку на страницу
-            document.body.appendChild(link);
-            
-            // Запускаем скачивание
-            link.click();
-            
-            // Удаляем ссылку
-            document.body.removeChild(link);
+        // Проверка на мобильное устройство
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        
+        async function imageToDataURL(img) {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            return canvas.toDataURL('image/jpeg');
+        }
+
+        async function downloadPage() {
+            try {
+                // Конвертируем изображения в Data URLs
+                const images = document.querySelectorAll('img');
+                for (let img of images) {
+                    if (!img.complete) {
+                        await new Promise(resolve => img.onload = resolve);
+                    }
+                    const dataUrl = await imageToDataURL(img);
+                    img.setAttribute('src', dataUrl);
+                }
+
+                const htmlContent = document.documentElement.outerHTML;
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const fileName = 'gallery.html';
+
+                if (isMobile()) {
+                    // Пробуем использовать Web Share API для мобильных устройств
+                    if (navigator.share) {
+                        try {
+                            const file = new File([blob], fileName, { type: 'text/html' });
+                            await navigator.share({
+                                files: [file],
+                                title: 'Галерея изображений',
+                            });
+                            return;
+                        } catch (err) {
+                            console.log('Share failed:', err);
+                            // Если шаринг не удался, продолжаем с альтернативными методами
+                        }
+                    }
+
+                    // Пробуем использовать saveAs из FileSaver.js
+                    if (window.saveAs) {
+                        window.saveAs(blob, fileName);
+                        return;
+                    }
+
+                    // Создаем временную ссылку для скачивания
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = fileName;
+                    
+                    // Добавляем специальные атрибуты для iOS
+                    link.setAttribute('target', '_blank');
+                    link.setAttribute('rel', 'noopener');
+                    
+                    // Пробуем разные способы активации скачивания
+                    document.body.appendChild(link);
+                    
+                    // Эмулируем клик с небольшой задержкой
+                    setTimeout(() => {
+                        link.dispatchEvent(new MouseEvent('click', {
+                            bubbles: true,
+                            cancelable: true,
+                            view: window
+                        }));
+                        
+                        // Удаляем ссылку и освобождаем URL
+                        setTimeout(() => {
+                            document.body.removeChild(link);
+                            window.URL.revokeObjectURL(url);
+                        }, 100);
+                    }, 0);
+
+                } else {
+                    // Стандартный метод для десктопов
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }
+            } catch (error) {
+                console.error('Ошибка при скачивании:', error);
+                alert('Не удалось скачать галерею. Попробуйте открыть в браузере.');
+                
+                // В случае ошибки пробуем открыть в новой вкладке
+                try {
+                    const url = window.URL.createObjectURL(blob);
+                    window.open(url, '_blank');
+                    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+                } catch (e) {
+                    console.error('Ошибка при открытии в новой вкладке:', e);
+                }
+            }
         }
 
         document.addEventListener('touchstart', function(e) {
@@ -132,4 +223,4 @@
         }
     </script>
 </body>
-</html>
+</html> 
