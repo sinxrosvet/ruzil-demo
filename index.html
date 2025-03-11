@@ -34,36 +34,34 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             display: block;
         }
-        .download-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #0088cc; /* Цвет Telegram */
+        .download-link {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 122, 255, 0.9);
             color: white;
-            border: none;
+            text-decoration: none;
+            padding: 8px 16px;
             border-radius: 20px;
-            padding: 12px 24px;
             font-size: 14px;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 136, 204, 0.3);
             display: flex;
             align-items: center;
-            gap: 8px;
-            z-index: 1000;
-            text-decoration: none;
+            gap: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
-            -webkit-tap-highlight-color: transparent;
         }
-        .download-button:hover {
-            background: #006699;
+        .download-link:hover {
+            background: rgba(0, 122, 255, 1);
+            transform: translateY(-2px);
         }
-        .download-button:active {
-            transform: scale(0.95);
+        .download-link:active {
+            transform: translateY(0);
         }
-        .telegram-icon {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
+        @media (max-width: 768px) {
+            .download-link {
+                padding: 10px 20px;
+                font-size: 16px;
+            }
         }
         .loading {
             position: fixed;
@@ -82,15 +80,27 @@
     <div class="image-container">
         <div class="image-wrapper">
             <img src="image1.jpg" alt="Изображение 1">
+            <a href="image1.jpg" download class="download-link">
+                📥 Скачать
+            </a>
         </div>
         <div class="image-wrapper">
             <img src="image2.jpg" alt="Изображение 2">
+            <a href="image2.jpg" download class="download-link">
+                📥 Скачать
+            </a>
         </div>
         <div class="image-wrapper">
             <img src="image3.jpg" alt="Изображение 3">
+            <a href="image3.jpg" download class="download-link">
+                📥 Скачать
+            </a>
         </div>
         <div class="image-wrapper">
             <img src="image4.jpg" alt="Изображение 4">
+            <a href="image4.jpg" download class="download-link">
+                📥 Скачать
+            </a>
         </div>
     </div>
 
