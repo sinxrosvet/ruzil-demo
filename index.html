@@ -6,26 +6,31 @@
     <title>Галерея изображений</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            color-scheme: light dark;
+        }
+
         html, body {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: var(--tg-theme-bg-color, #f0f0f0);
+            background-color: var(--tg-theme-bg-color, #ffffff);
             color: var(--tg-theme-text-color, #000000);
         }
         .image-container {
             max-width: 800px;
             margin: 20px auto;
             padding: 0 20px;
-            padding-bottom: 80px;
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
         }
         .image-wrapper {
             margin-bottom: 20px;
             position: relative;
-            border-radius: 8px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         img {
             width: 100%;
@@ -40,8 +45,8 @@
             gap: 8px;
         }
         .action-button {
-            background: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
+            background: linear-gradient(-30deg, #3d0b0b 50%, #2b0808 50%);
+            color: #f7d4d4;
             border: none;
             padding: 8px 16px;
             border-radius: 20px;
@@ -50,13 +55,57 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            transition: opacity 0.3s;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
         }
+        
+        .action-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        .action-button:hover::before {
+            box-shadow: 
+                0 0 20px #ffd700,
+                0 0 40px #ffa500,
+                0 0 60px #ff8c00;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
         .action-button:hover {
-            opacity: 0.9;
+            text-shadow: 
+                0 0 10px #e8df95,
+                0 0 20px #ddcf2d,
+                0 0 30px #ffcc00;
+            animation: textGlow 1.5s ease-in-out infinite;
         }
-        .action-button:active {
-            opacity: 0.8;
+
+        @keyframes textGlow {
+            0% { color: #e8df95; }
+            50% { color: #ffcc00; }
+            100% { color: #e8df95; }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --tg-theme-bg-color: #1f1f1f;
+                --tg-theme-text-color: #ffffff;
+                --tg-theme-button-color: #2481cc;
+                --tg-theme-button-text-color: #ffffff;
+                --tg-theme-secondary-bg-color: #2f2f2f;
+            }
         }
     </style>
 </head>
@@ -65,29 +114,25 @@
         <div class="image-wrapper">
             <img src="image1.jpg" alt="Изображение 1" data-filename="image1.jpg">
             <div class="actions">
-                <button onclick="downloadImage(this)" class="action-button">📥 Скачать</button>
-                <button onclick="shareImage(this)" class="action-button">📤 Поделиться</button>
+                <button onclick="shareImage(this)" class="action-button">📤 Отправить</button>
             </div>
         </div>
         <div class="image-wrapper">
             <img src="image2.jpg" alt="Изображение 2" data-filename="image2.jpg">
             <div class="actions">
-                <button onclick="downloadImage(this)" class="action-button">📥 Скачать</button>
-                <button onclick="shareImage(this)" class="action-button">📤 Поделиться</button>
+                <button onclick="shareImage(this)" class="action-button">📤 Отправить</button>
             </div>
         </div>
         <div class="image-wrapper">
             <img src="image3.jpg" alt="Изображение 3" data-filename="image3.jpg">
             <div class="actions">
-                <button onclick="downloadImage(this)" class="action-button">📥 Скачать</button>
-                <button onclick="shareImage(this)" class="action-button">📤 Поделиться</button>
+                <button onclick="shareImage(this)" class="action-button">📤 Отправить</button>
             </div>
         </div>
         <div class="image-wrapper">
             <img src="image4.jpg" alt="Изображение 4" data-filename="image4.jpg">
             <div class="actions">
-                <button onclick="downloadImage(this)" class="action-button">📥 Скачать</button>
-                <button onclick="shareImage(this)" class="action-button">📤 Поделиться</button>
+                <button onclick="shareImage(this)" class="action-button">📤 Отправить</button>
             </div>
         </div>
     </div>
@@ -95,29 +140,24 @@
     <script>
         // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
+        tg.ready();
         tg.expand();
-        
-        // Функция для скачивания изображения
-        function downloadImage(button) {
+
+        // Функция для отправки изображения через бота
+        function shareImage(button) {
             const img = button.closest('.image-wrapper').querySelector('img');
             const filename = img.dataset.filename;
             
-            // Используем нативный метод Telegram для скачивания
-            tg.downloadFile(img.src, filename);
-        }
-        
-        // Функция для отправки изображения в другой чат
-        function shareImage(button) {
-            const img = button.closest('.image-wrapper').querySelector('img');
+            // Создаем эффект нажатия
+            button.style.transform = 'scale(0.95)';
+            setTimeout(() => button.style.transform = '', 200);
             
-            // Подготавливаем сообщение для отправки
-            const message = {
-                type: 'photo',
-                media: img.src
-            };
-            
-            // Используем нативный метод Telegram для шаринга
-            tg.shareMessage(message);
+            // Отправляем данные в бота
+            tg.sendData(JSON.stringify({
+                action: 'share_image',
+                image_url: img.src,
+                filename: filename
+            }));
         }
 
         // Обработчики событий масштабирования
@@ -148,13 +188,4 @@
                 isScaling = false;
                 currentScale = parseFloat(document.body.style.transform?.replace('scale(', '')) || 1;
             }
-        });
-
-        function getDistance(touch1, touch2) {
-            const dx = touch1.clientX - touch2.clientX;
-            const dy = touch1.clientY - touch2.clientY;
-            return Math.sqrt(dx * dx + dy * dy);
-        }
-    </script>
-</body>
-</html> 
+        
