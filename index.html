@@ -1,78 +1,135 @@
-<script>
-    let currentScale = 1;
-    let startDistance = 0;
-    let isScaling = false;
-    
-    async function imageToDataURL(img) {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        return canvas.toDataURL('image/jpeg');
-    }
-
-    async function downloadPage() {
-        try {
-            const images = document.querySelectorAll('img');
-            for (let img of images) {
-                if (!img.complete) {
-                    await new Promise(resolve => img.onload = resolve);
-                }
-                const dataUrl = await imageToDataURL(img);
-                img.setAttribute('src', dataUrl);
-            }
-
-            const htmlContent = document.documentElement.outerHTML;
-            const blob = new Blob([htmlContent], { type: 'text/html' });
-            const url = window.URL.createObjectURL(blob);
-
-            // Определяем, является ли устройство мобильным
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-            if (isMobile) {
-                // Для мобильных устройств используем другой подход
-                try {
-                    // Пробуем использовать navigator.share если доступно
-                    if (navigator.share) {
-                        const file = new File([blob], 'gallery.html', { type: 'text/html' });
-                        await navigator.share({
-                            files: [file],
-                            title: 'Галерея изображений',
-                        });
-                    } else {
-                        // Если share API недоступен, пробуем прямое скачивание
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = 'gallery.html';
-                        a.style.display = 'none';
-                        document.body.appendChild(a);
-                        a.click();
-                        setTimeout(() => {
-                            document.body.removeChild(a);
-                            window.URL.revokeObjectURL(url);
-                        }, 100);
-                    }
-                } catch (err) {
-                    console.error('Ошибка при попытке поделиться файлом:', err);
-                    // Если не удалось использовать share API, открываем в новой вкладке
-                    window.open(url, '_blank');
-                }
-            } else {
-                // Для десктопов используем стандартный подход
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'gallery.html';
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                }, 100);
-            }
-        } catch (error) {
-            console.error('Ошибка при скачивании:', error);
-            alert('Не удалось скачать галерею. Попробуйте открыть в браузере.');
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
+    <title>Галерея изображений</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f0f0f0;
         }
-    }
-</script> 
+        body {
+            transform-origin: top center;
+        }
+        .image-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+            padding-bottom: 80px;
+        }
+        .image-wrapper {
+            margin-bottom: 20px;
+        }
+        img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: block;
+        }
+        .download-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            transform: none;
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        .download-button:hover {
+            background: #0066CC;
+        }
+        .download-button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <div class="image-container">
+        <div class="image-wrapper">
+            <img src="image1.jpg" alt="Изображение 1">
+        </div>
+        <div class="image-wrapper">
+            <img src="image2.jpg" alt="Изображение 2">
+        </div>
+        <div class="image-wrapper">
+            <img src="image3.jpg" alt="Изображение 3">
+        </div>
+        <div class="image-wrapper">
+            <img src="image4.jpg" alt="Изображение 4">
+        </div>
+    </div>
+
+    <button class="download-button" onclick="downloadPage()">
+        📥 Скачать файл
+    </button>
+
+    <script>
+        let currentScale = 1;
+        let startDistance = 0;
+        let isScaling = false;
+
+        function downloadPage() {
+            // Создаем ссылку для скачивания
+            const link = document.createElement('a');
+            link.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(document.documentElement.outerHTML));
+            link.setAttribute('download', 'gallery.html');
+            
+            // Добавляем ссылку на страницу
+            document.body.appendChild(link);
+            
+            // Запускаем скачивание
+            link.click();
+            
+            // Удаляем ссылку
+            document.body.removeChild(link);
+        }
+
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                isScaling = true;
+                startDistance = getDistance(e.touches[0], e.touches[1]);
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches.length === 2 && isScaling) {
+                e.preventDefault();
+                const currentDistance = getDistance(e.touches[0], e.touches[1]);
+                const scale = currentDistance / startDistance;
+                
+                const newScale = Math.min(Math.max(currentScale * scale, 0.5), 3);
+                document.body.style.transform = `scale(${newScale})`;
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchend', function(e) {
+            if (e.touches.length < 2) {
+                isScaling = false;
+                currentScale = parseFloat(document.body.style.transform?.replace('scale(', '')) || 1;
+            }
+        });
+
+        function getDistance(touch1, touch2) {
+            const dx = touch1.clientX - touch2.clientX;
+            const dy = touch1.clientY - touch2.clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+    </script>
+</body>
+</html> 
