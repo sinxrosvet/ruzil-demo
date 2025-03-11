@@ -4,18 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
     <title>Галерея изображений</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         html, body {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #f0f0f0;
-        }
-        body {
-            transform-origin: top center;
+            background-color: var(--tg-theme-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000000);
         }
         .image-container {
             max-width: 800px;
@@ -26,160 +23,107 @@
         .image-wrapper {
             margin-bottom: 20px;
             position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         img {
             width: 100%;
             height: auto;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             display: block;
         }
-        .download-link {
+        .actions {
             position: absolute;
             bottom: 10px;
             right: 10px;
-            background: rgba(0, 122, 255, 0.9);
-            color: white;
-            text-decoration: none;
+            display: flex;
+            gap: 8px;
+        }
+        .action-button {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
             padding: 8px 16px;
             border-radius: 20px;
             font-size: 14px;
+            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
+            transition: opacity 0.3s;
         }
-        .download-link:hover {
-            background: rgba(0, 122, 255, 1);
-            transform: translateY(-2px);
+        .action-button:hover {
+            opacity: 0.9;
         }
-        .download-link:active {
-            transform: translateY(0);
-        }
-        @media (max-width: 768px) {
-            .download-link {
-                padding: 10px 20px;
-                font-size: 16px;
-            }
-        }
-        .loading {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 15px 30px;
-            border-radius: 25px;
-            z-index: 1001;
+        .action-button:active {
+            opacity: 0.8;
         }
     </style>
 </head>
 <body>
     <div class="image-container">
         <div class="image-wrapper">
-            <img src="image1.jpg" alt="Изображение 1">
-            <a href="image1.jpg" download class="download-link">
-                📥 Скачать
-            </a>
+            <img src="image1.jpg" alt="Изображение 1" data-filename="image1.jpg">
+            <div class="actions">
+                <button onclick="downloadImage(this)" class="action-button">📥 Скачать</button>
+                <button onclick="shareImage(this)" class="action-button">📤 Поделиться</button>
+            </div>
         </div>
         <div class="image-wrapper">
-            <img src="image2.jpg" alt="Изображение 2">
-            <a href="image2.jpg" download class="download-link">
-                📥 Скачать
-            </a>
+            <img src="image2.jpg" alt="Изображение 2" data-filename="image2.jpg">
+            <div class="actions">
+                <button onclick="downloadImage(this)" class="action-button">📥 Скачать</button>
+                <button onclick="shareImage(this)" class="action-button">📤 Поделиться</button>
+            </div>
         </div>
         <div class="image-wrapper">
-            <img src="image3.jpg" alt="Изображение 3">
-            <a href="image3.jpg" download class="download-link">
-                📥 Скачать
-            </a>
+            <img src="image3.jpg" alt="Изображение 3" data-filename="image3.jpg">
+            <div class="actions">
+                <button onclick="downloadImage(this)" class="action-button">📥 Скачать</button>
+                <button onclick="shareImage(this)" class="action-button">📤 Поделиться</button>
+            </div>
         </div>
         <div class="image-wrapper">
-            <img src="image4.jpg" alt="Изображение 4">
-            <a href="image4.jpg" download class="download-link">
-                📥 Скачать
-            </a>
+            <img src="image4.jpg" alt="Изображение 4" data-filename="image4.jpg">
+            <div class="actions">
+                <button onclick="downloadImage(this)" class="action-button">📥 Скачать</button>
+                <button onclick="shareImage(this)" class="action-button">📤 Поделиться</button>
+            </div>
         </div>
     </div>
 
-    <a href="tg://resolve?domain=best_content_fortg_bot" class="download-button">
-        <svg class="telegram-icon" viewBox="0 0 24 24">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .24z"/>
-        </svg>
-        Отправить в Telegram
-    </a>
-
     <script>
+        // Инициализация Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        // Функция для скачивания изображения
+        function downloadImage(button) {
+            const img = button.closest('.image-wrapper').querySelector('img');
+            const filename = img.dataset.filename;
+            
+            // Используем нативный метод Telegram для скачивания
+            tg.downloadFile(img.src, filename);
+        }
+        
+        // Функция для отправки изображения в другой чат
+        function shareImage(button) {
+            const img = button.closest('.image-wrapper').querySelector('img');
+            
+            // Подготавливаем сообщение для отправки
+            const message = {
+                type: 'photo',
+                media: img.src
+            };
+            
+            // Используем нативный метод Telegram для шаринга
+            tg.shareMessage(message);
+        }
+
+        // Обработчики событий масштабирования
         let currentScale = 1;
         let startDistance = 0;
         let isScaling = false;
-
-        // Проверка на мобильное устройство
-        function isMobile() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-        
-        async function imageToBlob(img) {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
-            
-            return new Promise((resolve) => {
-                canvas.toBlob((blob) => {
-                    resolve(blob);
-                }, 'image/jpeg', 0.8);
-            });
-        }
-
-        async function downloadImages() {
-            try {
-                // Показываем индикатор загрузки
-                const loading = document.createElement('div');
-                loading.className = 'loading';
-                loading.textContent = 'Подготовка изображений...';
-                document.body.appendChild(loading);
-
-                const zip = new JSZip();
-                const images = document.querySelectorAll('img');
-                
-                // Добавляем все изображения в ZIP
-                for (let i = 0; i < images.length; i++) {
-                    const img = images[i];
-                    if (!img.complete) {
-                        await new Promise(resolve => img.onload = resolve);
-                    }
-                    const blob = await imageToBlob(img);
-                    zip.file(`image${i + 1}.jpg`, blob);
-                }
-
-                // Генерируем ZIP файл
-                const content = await zip.generateAsync({
-                    type: 'blob',
-                    compression: 'DEFLATE',
-                    compressionOptions: {
-                        level: 6
-                    }
-                });
-
-                // Скачиваем ZIP
-                saveAs(content, 'gallery_images.zip');
-                
-                // Удаляем индикатор загрузки
-                loading.remove();
-                
-            } catch (error) {
-                console.error('Ошибка при скачивании:', error);
-                alert('Произошла ошибка. Пожалуйста, попробуйте еще раз.');
-                
-                // Удаляем индикатор загрузки в случае ошибки
-                const loading = document.querySelector('.loading');
-                if (loading) loading.remove();
-            }
-        }
 
         document.addEventListener('touchstart', function(e) {
             if (e.touches.length === 2) {
@@ -194,7 +138,6 @@
                 e.preventDefault();
                 const currentDistance = getDistance(e.touches[0], e.touches[1]);
                 const scale = currentDistance / startDistance;
-                
                 const newScale = Math.min(Math.max(currentScale * scale, 0.5), 3);
                 document.body.style.transform = `scale(${newScale})`;
             }
