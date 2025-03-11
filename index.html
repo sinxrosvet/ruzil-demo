@@ -112,27 +112,27 @@
 <body>
     <div class="image-container">
         <div class="image-wrapper">
-            <img src="image1.jpg" alt="Изображение 1" data-filename="image1.jpg">
+            <img src="image1.jpg" alt="Изображение 1" data-fileid="BQACAgIAAxkBAAIrr2fP8kCY1C3KbRTVMyOu_qvkZSD0AAJkYgAC9OyASkhcGkFVWwq1NgQ">
             <div class="actions">
-                <button onclick="shareImage(this)" class="action-button">📤 Отправить</button>
+                <button onclick="sendFile(this)" class="action-button">📥 Скачать</button>
             </div>
         </div>
         <div class="image-wrapper">
-            <img src="image2.jpg" alt="Изображение 2" data-filename="image2.jpg">
+            <img src="image2.jpg" alt="Изображение 2" data-fileid="BQACAgIAAxkBAAIrb2fP8kCY1C3KbRTVMyOu_qvkZSD0AAJkYgAC9OyASkhcGkFVWwq1NgQ">
             <div class="actions">
-                <button onclick="shareImage(this)" class="action-button">📤 Отправить</button>
+                <button onclick="sendFile(this)" class="action-button">📥 Скачать</button>
             </div>
         </div>
         <div class="image-wrapper">
-            <img src="image3.jpg" alt="Изображение 3" data-filename="image3.jpg">
+            <img src="image3.jpg" alt="Изображение 3" data-fileid="BQACAgIAAxkBAAIrb2fP8kCY1C3KbRTVMyOu_qvkZSD0AAJkYgAC9OyASkhcGkFVWwq1NgQ">
             <div class="actions">
-                <button onclick="shareImage(this)" class="action-button">📤 Отправить</button>
+                <button onclick="sendFile(this)" class="action-button">📥 Скачать</button>
             </div>
         </div>
         <div class="image-wrapper">
-            <img src="image4.jpg" alt="Изображение 4" data-filename="image4.jpg">
+            <img src="image4.jpg" alt="Изображение 4" data-fileid="BQACAgIAAxkBAAIrb2fP8kCY1C3KbRTVMyOu_qvkZSD0AAJkYgAC9OyASkhcGkFVWwq1NgQ">
             <div class="actions">
-                <button onclick="shareImage(this)" class="action-button">📤 Отправить</button>
+                <button onclick="sendFile(this)" class="action-button">📥 Скачать</button>
             </div>
         </div>
     </div>
@@ -143,10 +143,10 @@
         tg.ready();
         tg.expand();
 
-        // Функция для отправки изображения через бота
-        function shareImage(button) {
+        // Функция для отправки файла через бота
+        function sendFile(button) {
             const img = button.closest('.image-wrapper').querySelector('img');
-            const filename = img.dataset.filename;
+            const fileId = img.dataset.fileid;
             
             // Создаем эффект нажатия
             button.style.transform = 'scale(0.95)';
@@ -154,9 +154,8 @@
             
             // Отправляем данные в бота
             tg.sendData(JSON.stringify({
-                action: 'share_image',
-                image_url: img.src,
-                filename: filename
+                action: 'send_file',
+                file_id: fileId
             }));
         }
 
@@ -188,4 +187,13 @@
                 isScaling = false;
                 currentScale = parseFloat(document.body.style.transform?.replace('scale(', '')) || 1;
             }
-        
+        });
+
+        function getDistance(touch1, touch2) {
+            const dx = touch1.clientX - touch2.clientX;
+            const dy = touch1.clientY - touch2.clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+    </script>
+</body>
+</html> 
