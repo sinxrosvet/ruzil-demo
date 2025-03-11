@@ -112,68 +112,34 @@
 
                 const htmlContent = document.documentElement.outerHTML;
                 const blob = new Blob([htmlContent], { type: 'text/html' });
-                const url = window.URL.createObjectURL(blob);
 
                 if (isMobile()) {
-                    // Для мобильных устройств показываем инструкцию
-                    const modal = document.createElement('div');
-                    modal.style.cssText = `
-                        position: fixed;
-                        top: 50%;
-                        left: 50%;
-                        transform: translate(-50%, -50%);
-                        background: white;
-                        padding: 20px;
-                        border-radius: 10px;
-                        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-                        z-index: 1001;
-                        max-width: 90%;
-                        width: 300px;
-                        text-align: center;
-                    `;
-                    
-                    const overlay = document.createElement('div');
-                    overlay.style.cssText = `
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        right: 0;
-                        bottom: 0;
-                        background: rgba(0,0,0,0.5);
-                        z-index: 1000;
-                    `;
-                    
-                    modal.innerHTML = `
-                        <h3 style="margin-top: 0;">Как сохранить галерею</h3>
-                        <p>1. Нажмите кнопку "Открыть галерею"</p>
-                        <p>2. В открывшейся вкладке нажмите на три точки (⋮) или поделиться</p>
-                        <p>3. Выберите "Скачать" или "Сохранить страницу"</p>
-                        <a href="${url}" target="_blank" style="
-                            display: block;
-                            background: #007AFF;
-                            color: white;
-                            padding: 10px 20px;
-                            border-radius: 20px;
-                            text-decoration: none;
-                            margin: 20px 0 10px;
-                        ">Открыть галерею</a>
-                        <button onclick="this.parentElement.remove(); document.querySelector('#download-overlay').remove();" style="
-                            border: none;
-                            background: none;
-                            color: #007AFF;
-                            padding: 10px;
-                            cursor: pointer;
-                        ">Закрыть</button>
-                    `;
-                    
-                    overlay.id = 'download-overlay';
-                    document.body.appendChild(overlay);
-                    document.body.appendChild(modal);
-                    
-                    // Очищаем URL через 5 минут
-                    setTimeout(() => window.URL.revokeObjectURL(url), 300000);
+                    try {
+                        // Создаем временный URL
+                        const url = window.URL.createObjectURL(blob);
+                        
+                        // Открываем в новой вкладке
+                        const newWindow = window.open(url, '_blank');
+                        
+                        if (newWindow) {
+                            // Если окно успешно открылось, показываем инструкцию
+                            alert('Для сохранения:\n1. Нажмите на три точки (⋮)\n2. Выберите "Скачать" или "Сохранить как"');
+                        } else {
+                            // Если окно не открылось (например, из-за блокировки попапов)
+                            alert('Не удалось открыть новую вкладку. Проверьте настройки блокировки всплывающих окон.');
+                        }
+                        
+                        // Очищаем URL через 1 минуту
+                        setTimeout(() => {
+                            window.URL.revokeObjectURL(url);
+                        }, 60000);
+                    } catch (e) {
+                        console.error('Ошибка при открытии:', e);
+                        alert('Произошла ошибка. Попробуйте открыть в браузере.');
+                    }
                 } else {
                     // Стандартный метод для десктопов
+                    const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
                     a.download = 'gallery.html';
