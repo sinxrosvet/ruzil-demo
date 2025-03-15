@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Курсы валют</title>
+    <!-- Подключаем Telegram WebApp API -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* Основные стили с поддержкой темы Telegram */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
+        }
+        /* Контейнер для центрирования содержимого */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        /* Стили для карточек с курсами валют */
+        .rate-card {
+            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        /* Заголовок карточки */
+        .rate-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--tg-theme-text-color, #000);
+        }
+        /* Значение курса */
+        .rate-value {
+            font-size: 24px;
+            color: var(--tg-theme-button-color, #2481cc);
+        }
+        /* Стиль для даты */
+        .date {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--tg-theme-hint-color, #999);
+        }
+        /* Контейнер для кнопок выбора города */
+        .city-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        /* Стиль кнопок */
+        .city-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #fff);
+            font-size: 16px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .city-button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Отображение текущей даты -->
+        <div class="date" id="currentDate"></div>
+        
+        <!-- Карточки с курсами валют -->
+        <div class="rate-card">
+            <div class="rate-title">🇷🇺 Рубли в Донги</div>
+            <div class="rate-value" id="rubVnd">Загрузка...</div>
+        </div>
+        
+        <div class="rate-card">
+            <div class="rate-title">🇺🇸 Доллары в Донги</div>
+            <div class="rate-value" id="usdVnd">Загрузка...</div>
+        </div>
+        
+        <div class="rate-card">
+            <div class="rate-title">✳️ USDT в Донги</div>
+            <div class="rate-value" id="usdtVnd">Загрузка...</div>
+        </div>
+        
+        <div class="rate-card">
+            <div class="rate-title">🇷🇺 Рубли в Гривны</div>
+            <div class="rate-value" id="rubUah">Загрузка...</div>
+        </div>
+
+        <!-- Кнопки выбора города -->
+        <div class="city-buttons">
+            <button class="city-button" onclick="selectCity('muine')">🌊 Муйне</button>
+            <button class="city-button" onclick="selectCity('nhatrang')">🌴 Нячанг</button>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация Telegram WebApp
+        let tg = window.Telegram.WebApp;
+        tg.expand(); // Раскрываем на весь экран
+        tg.ready(); // Сообщаем что приложение готово
+
+        // Функция форматирования чисел (добавляет разделители)
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        // Функция обработки выбора города
+        function selectCity(city) {
+            tg.sendData(JSON.stringify({
+                action: 'select_city',
+                city: city
+            }));
+        }
+
+        // Функция обновления курсов на странице
+        function updateRates(rates) {
+            document.getElementById('currentDate').textContent = rates.date;
+            document.getElementById('rubVnd').textContent = `${formatNumber(rates.rub_vnd)} ₫`;
+            document.getElementById('usdVnd').textContent = `${formatNumber(rates.usd_vnd)} ₫`;
+            document.getElementById('usdtVnd').textContent = `${formatNumber(rates.usdt_vnd)} ₫`;
+            document.getElementById('rubUah').textContent = `${formatNumber(rates.rub_uah)} ₴`;
+        }
+
+        // Получение курсов при загрузке страницы
+        fetch('/api/rates')
+            .then(response => response.json())
+            .then(data => {
+                if (data.rates) {
+                    updateRates(data.rates);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при получении курсов:', error);
+            });
+    </script>
+</body>
+</html> 
