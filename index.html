@@ -26,21 +26,21 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 10px 0;
-            font-size: 18px;
-            color: #333;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 15px 0;
+            font-size: 20px;
+            color: #fff;
             text-align: center;
             box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
         }
         @media (max-width: 768px) {
-            .mobile-message {
-                content: "Увеличьте пальцами для масштабирования.";
+            .mobile-message::after {
+                content: "Изменяйте масштаб пальцами.";
             }
         }
         @media (min-width: 769px) {
-            .mobile-message {
-                content: "Увеличьте окно браузера для лучшего просмотра.";
+            .mobile-message::after {
+                content: "Увеличьте окно браузера.";
             }
         }
     </style>
@@ -54,7 +54,6 @@
     </div>
 
     <div class="mobile-message">
-        Увеличьте окно браузера для лучшего просмотра.
     </div>
 
     <script>
