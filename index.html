@@ -2,143 +2,68 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Галерея изображений</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            color-scheme: light dark;
-        }
-
-        html, body {
+        body {
             margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
+            padding: 20px;
+            text-align: center;
         }
         .image-container {
             max-width: 800px;
-            margin: 20px auto;
-            padding: 0 20px;
-            padding-bottom: calc(20px + env(safe-area-inset-bottom));
-        }
-        .image-wrapper {
-            margin-bottom: 20px;
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin: 0 auto;
         }
         img {
             width: 100%;
             height: auto;
-            display: block;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-        .actions {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            display: flex;
-            gap: 8px;
+        .scale-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
         }
-        .button {
-            background: linear-gradient(-30deg, #3d0b0b 50%, #2b0808 50%);
-            color: #f7d4d4;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
+        button {
+            padding: 5px 10px;
+            margin: 0 5px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            transition: all 0.3s ease;
-            z-index: 1;
-        }
-
-        .button:hover::before {
-            box-shadow: 
-                0 0 20px #ffd700,
-                0 0 40px #ffa500,
-                0 0 60px #ff8c00;
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .button:hover {
-            text-shadow: 
-                0 0 10px #e8df95,
-                0 0 20px #ddcf2d,
-                0 0 30px #ffcc00;
-            animation: textGlow 1.5s ease-in-out infinite;
-        }
-
-        @keyframes textGlow {
-            0% { color: #e8df95; }
-            50% { color: #ffcc00; }
-            100% { color: #e8df95; }
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --tg-theme-bg-color: #1f1f1f;
-                --tg-theme-text-color: #ffffff;
-                --tg-theme-button-color: #2481cc;
-                --tg-theme-button-text-color: #ffffff;
-                --tg-theme-secondary-bg-color: #2f2f2f;
-            }
         }
     </style>
 </head>
 <body>
     <div class="image-container">
-        <div class="image-wrapper">
-            <img src="image1.jpg"
-                 alt="Изображение" 
-                 data-fileid="AgACAgIAAxkBAAIruWfP9SBTgDNNqbVvBr1NicPYZ1iiAAKI7jEb9OyASvlbJtXEzUIQAQADAgADbQADNgQ">
-            <div class="actions">
-                <button onclick="sendFile(this)" class="button">📥 Скачать</button>
-            </div>
-        </div>
+        <img src="image1.jpg" alt="Изображение 1">
+        <img src="image2.jpg" alt="Изображение 2">
+        <img src="image3.jpg" alt="Изображение 3">
+        <img src="image4.jpg" alt="Изображение 4">
+    </div>
+
+    <div class="scale-controls">
+        <button onclick="changeScale(0.1)">+</button>
+        <button onclick="changeScale(-0.1)">-</button>
+        <button onclick="resetScale()">Сброс</button>
     </div>
 
     <script>
-        // Инициализация Telegram WebApp
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
+        let currentScale = 1;
 
-        // Функция для отправки файла через бота
-        function sendFile(button) {
-            const img = button.closest('.image-wrapper').querySelector('img');
-            const fileId = img.dataset.fileid;
-            
-            // Создаем эффект нажатия
-            button.style.transform = 'scale(0.95)';
-            setTimeout(() => button.style.transform = '', 200);
-            
-            // Отправляем данные в бота
-            tg.sendData(JSON.stringify({
-                action: 'send_file',
-                file_id: fileId
-            }));
+        function changeScale(delta) {
+            currentScale += delta;
+            if (currentScale < 0.5) currentScale = 0.5;
+            if (currentScale > 2) currentScale = 2;
+            document.body.style.transform = `scale(${currentScale})`;
+        }
+
+        function resetScale() {
+            currentScale = 1;
+            document.body.style.transform = 'scale(1)';
         }
     </script>
 </body>
