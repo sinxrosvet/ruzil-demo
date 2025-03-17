@@ -22,14 +22,18 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .mobile-message {
-            display: none;
             margin-top: 20px;
             font-size: 18px;
             color: #333;
         }
         @media (max-width: 768px) {
             .mobile-message {
-                display: block;
+                content: "Увеличьте пальцами для масштабирования.";
+            }
+        }
+        @media (min-width: 769px) {
+            .mobile-message {
+                content: "Увеличьте окно браузера для лучшего просмотра.";
             }
         }
     </style>
@@ -43,7 +47,7 @@
     </div>
 
     <div class="mobile-message">
-        Вы можете увеличить масштаб, используя жесты на экране.
+        Увеличьте окно браузера для лучшего просмотра.
     </div>
 
     <script>
