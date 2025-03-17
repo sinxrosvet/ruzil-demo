@@ -21,41 +21,16 @@
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-        .scale-controls {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.7);
-            padding: 10px;
-            border-radius: 5px;
-            color: white;
-            z-index: 1000;
-            transform: none !important;
+        .mobile-message {
+            display: none;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
         }
-        button {
-            padding: 8px 15px;
-            margin: 0 5px;
-            cursor: pointer;
-            border: none;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 16px;
-            transition: transform 0.2s;
-        }
-        button:active {
-            transform: scale(0.95);
-        }
-        .btn-plus {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .btn-minus {
-            background-color: #f44336;
-            color: white;
-        }
-        .btn-reset {
-            background-color: #2196F3;
-            color: white;
+        @media (max-width: 768px) {
+            .mobile-message {
+                display: block;
+            }
         }
     </style>
 </head>
@@ -67,48 +42,13 @@
         <img src="image4.jpg" alt="Изображение 4">
     </div>
 
-    <div class="scale-controls">
-        <button class="btn-plus" onclick="changeScale(0.1)">+</button>
-        <button class="btn-minus" onclick="changeScale(-0.1)">-</button>
-        <button class="btn-reset" onclick="resetScale()">Сброс</button>
+    <div class="mobile-message">
+        Вы можете увеличить масштаб, используя жесты на экране.
     </div>
 
     <script>
         let currentScale = 1;
         const container = document.querySelector('.image-container');
-
-        let isDragging = false;
-        let startX, startY, scrollLeft, scrollTop;
-
-        container.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            startX = e.pageX - container.offsetLeft;
-            startY = e.pageY - container.offsetTop;
-            scrollLeft = container.scrollLeft;
-            scrollTop = container.scrollTop;
-            container.style.cursor = 'grabbing';
-        });
-
-        container.addEventListener('mouseleave', () => {
-            isDragging = false;
-            container.style.cursor = 'default';
-        });
-
-        container.addEventListener('mouseup', () => {
-            isDragging = false;
-            container.style.cursor = 'default';
-        });
-
-        container.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            e.preventDefault();
-            const x = e.pageX - container.offsetLeft;
-            const y = e.pageY - container.offsetTop;
-            const walkX = (x - startX) * 2; // скорость перемещения по X
-            const walkY = (y - startY) * 2; // скорость перемещения по Y
-            container.scrollLeft = scrollLeft - walkX;
-            container.scrollTop = scrollTop - walkY;
-        });
 
         function changeScale(delta) {
             currentScale += delta;
