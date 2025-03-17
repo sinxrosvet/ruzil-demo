@@ -9,13 +9,10 @@
             margin: 0;
             padding: 20px;
             text-align: center;
-            min-height: 100vh;
-            position: relative;
         }
         .image-container {
             max-width: 800px;
             margin: 0 auto;
-            transform-origin: top center;
         }
         img {
             width: 100%;
@@ -33,6 +30,7 @@
             border-radius: 5px;
             color: white;
             z-index: 1000;
+            transform: none !important;
         }
         button {
             padding: 8px 15px;
@@ -59,21 +57,9 @@
             background-color: #2196F3;
             color: white;
         }
-        .scale-info {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.7);
-            padding: 10px;
-            border-radius: 5px;
-            color: white;
-            z-index: 1000;
-        }
     </style>
 </head>
 <body>
-    <div class="scale-info">Масштаб: <span id="scaleValue">100</span>%</div>
-    
     <div class="image-container">
         <img src="image1.jpg" alt="Изображение 1">
         <img src="image2.jpg" alt="Изображение 2">
@@ -90,28 +76,17 @@
     <script>
         let currentScale = 1;
         const container = document.querySelector('.image-container');
-        const scaleValue = document.getElementById('scaleValue');
-
-        function updateScaleInfo() {
-            scaleValue.textContent = Math.round(currentScale * 100);
-        }
 
         function changeScale(delta) {
             currentScale += delta;
             if (currentScale < 0.5) currentScale = 0.5;
             if (currentScale > 2) currentScale = 2;
             container.style.transform = `scale(${currentScale})`;
-            updateScaleInfo();
-            
-            // Автоматически прокручиваем страницу, чтобы контент оставался видимым
-            window.scrollTo(0, 0);
         }
 
         function resetScale() {
             currentScale = 1;
             container.style.transform = 'scale(1)';
-            updateScaleInfo();
-            window.scrollTo(0, 0);
         }
     </script>
 </body>
