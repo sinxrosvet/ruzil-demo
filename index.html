@@ -29,11 +29,32 @@
             padding: 10px;
             border-radius: 5px;
             color: white;
+            z-index: 1000;
         }
         button {
-            padding: 5px 10px;
+            padding: 8px 15px;
             margin: 0 5px;
             cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        .btn-plus {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-minus {
+            background-color: #f44336;
+            color: white;
+        }
+        .btn-reset {
+            background-color: #2196F3;
+            color: white;
         }
     </style>
 </head>
@@ -46,24 +67,25 @@
     </div>
 
     <div class="scale-controls">
-        <button onclick="changeScale(0.1)">+</button>
-        <button onclick="changeScale(-0.1)">-</button>
-        <button onclick="resetScale()">Сброс</button>
+        <button class="btn-plus" onclick="changeScale(0.1)">+</button>
+        <button class="btn-minus" onclick="changeScale(-0.1)">-</button>
+        <button class="btn-reset" onclick="resetScale()">Сброс</button>
     </div>
 
     <script>
         let currentScale = 1;
+        const container = document.querySelector('.image-container');
 
         function changeScale(delta) {
             currentScale += delta;
             if (currentScale < 0.5) currentScale = 0.5;
             if (currentScale > 2) currentScale = 2;
-            document.body.style.transform = `scale(${currentScale})`;
+            container.style.transform = `scale(${currentScale})`;
         }
 
         function resetScale() {
             currentScale = 1;
-            document.body.style.transform = 'scale(1)';
+            container.style.transform = 'scale(1)';
         }
     </script>
 </body>
