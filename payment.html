@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: 'unsafe-inline' 'unsafe-eval'; connect-src https: wss:; img-src https: data:;">
     <title>Оплата</title>
     <script src="https://widget.cloudpayments.ru/bundles/cloudpayments.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -75,23 +74,19 @@
                 {
                     onSuccess: function (options) {
                         // Успешная оплата
-                        alert('Success callback triggered: ' + JSON.stringify(options));
+                        alert('Оплата успешно завершена! ID транзакции: ' + options.invoiceId);
                         window.Telegram.WebApp.sendData(JSON.stringify({
                             status: 'success',
                             invoiceId: options.invoiceId
                         }));
-                        alert('Data sent to Telegram');
-                        window.Telegram.WebApp.close();
                     },
                     onFail: function (reason, options) {
                         // Неуспешная оплата
-                        alert('Fail callback triggered. Reason: ' + reason);
+                        alert('Ошибка оплаты: ' + reason);
                         window.Telegram.WebApp.sendData(JSON.stringify({
                             status: 'failed',
                             reason: reason
                         }));
-                        alert('Data sent to Telegram');
-                        window.Telegram.WebApp.close();
                     },
                     onComplete: function (paymentResult, options) {
                         //Вызывается как только виджет получает от api.cloudpayments ответ с результатом транзакции.
