@@ -63,18 +63,22 @@
         
         function pay() {
             try {
+                // Получаем параметр из URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const startParam = urlParams.get('start_param');
+                
                 var widget = new cp.CloudPayments();
                 widget.pay('charge',
                     {
                         publicId: 'test_api_00000000000000000000001',
-                        description: tg.initDataUnsafe.start_param === 'landing' ? 
+                        description: startParam === 'landing' ? 
                             'Оплата за Разбор Лендинга' : 'Оплата за разбор стратегических сессий',
-                        amount: tg.initDataUnsafe.start_param === 'landing' ? 3000 : 20000,
+                        amount: startParam === 'landing' ? 3000 : 20000,
                         currency: 'RUB',
                         invoiceId: new Date().getTime(),
                         skin: "modern",
                         data: {
-                            myProp: 'myProp value'
+                            service_type: startParam
                         }
                     },
                     {
