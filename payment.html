@@ -67,7 +67,8 @@
                 widget.pay('charge',
                     {
                         publicId: 'test_api_00000000000000000000001',
-                        description: 'Доступ к результатам анализа',
+                        description: tg.initDataUnsafe.start_param === 'landing' ? 
+                            'Оплата за Разбор Лендинга' : 'Оплата за разбор стратегических сессий',
                         amount: 990,
                         currency: 'RUB',
                         invoiceId: new Date().getTime(),
