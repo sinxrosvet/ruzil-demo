@@ -78,14 +78,12 @@
                     },
                     {
                         onSuccess: function (options) {
-                            alert('Оплата успешно завершена! ID транзакции: ' + options.invoiceId);
                             window.Telegram.WebApp.sendData(JSON.stringify({
                                 status: 'success',
                                 invoiceId: options.invoiceId
                             }));
                         },
                         onFail: function (reason, options) {
-                            alert('Ошибка оплаты: ' + reason);
                             window.Telegram.WebApp.sendData(JSON.stringify({
                                 status: 'failed',
                                 reason: reason
@@ -98,7 +96,10 @@
                     }
                 )
             } catch (error) {
-                alert('Ошибка при инициализации оплаты: ' + error.message);
+                window.Telegram.WebApp.sendData(JSON.stringify({
+                    status: 'failed',
+                    reason: error.message
+                }));
             }
         };
 
