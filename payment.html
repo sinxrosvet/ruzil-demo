@@ -63,9 +63,10 @@
         
         function pay() {
             try {
-                // Получаем параметр из URL
+                // Получаем параметры из URL
                 const urlParams = new URLSearchParams(window.location.search);
                 const startParam = urlParams.get('start_param');
+                const contentId = urlParams.get('content_id');
                 
                 var widget = new cp.CloudPayments();
                 widget.pay('charge',
@@ -78,20 +79,29 @@
                         invoiceId: new Date().getTime(),
                         skin: "modern",
                         data: {
-                            service_type: startParam
+                            service_type: startParam,
+                            content_id: contentId
                         }
                     },
                     {
                         onSuccess: function (options) {
                             window.Telegram.WebApp.sendData(JSON.stringify({
                                 status: 'success',
-                                invoiceId: options.invoiceId
+                                invoiceId: options.invoiceId,
+                                url_params: {
+                                    start_param: startParam,
+                                    content_id: contentId
+                                }
                             }));
                         },
                         onFail: function (reason, options) {
                             window.Telegram.WebApp.sendData(JSON.stringify({
                                 status: 'failed',
-                                reason: reason
+                                reason: reason,
+                                url_params: {
+                                    start_param: startParam,
+                                    content_id: contentId
+                                }
                             }));
                         },
                         onComplete: function (paymentResult, options) {
