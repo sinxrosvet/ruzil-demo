@@ -12,19 +12,18 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: var(--tg-theme-bg-color, #f5f5f5);
-            color: var(--tg-theme-text-color, #000000);
+            background-color: #f5f5f5;
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
-            background: var(--tg-theme-secondary-bg-color, white);
+            background: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .button {
-            background-color: #2cab37;
+            background-color: #0088cc;
             color: white;
             border: none;
             padding: 12px 20px;
@@ -34,59 +33,35 @@
             font-size: 16px;
             margin-top: 20px;
         }
-        .test-button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-            font-size: 14px;
-        }
         .price {
             font-size: 24px;
             font-weight: bold;
-            color: var(--tg-theme-text-color, #333);
+            color: #333;
             text-align: center;
             margin: 20px 0;
         }
         .description {
-            color: var(--tg-theme-hint-color, #666);
+            color: #666;
             text-align: center;
             margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="price">990 ₽</div>
-        <div class="description">Доступ к результатам анализа</div>
-        <button class="button" onclick="pay()">Оплатить</button>
-        <button class="test-button" onclick="sendTestData()">Тест отправки данных</button>
-    </div>
-
     <script>
         let tg = window.Telegram.WebApp;
-
-        // Инициализация WebApp
-        tg.ready();
         tg.expand();
         
-        // Функция для тестовой отправки данных
-        function sendTestData() {
-            console.log("Отправка тестовых данных...");
-            const testData = {
-                status: 'test',
-                message: 'Тестовая отправка данных'
-            };
-            tg.sendData(JSON.stringify(testData));
-            console.log("Тестовые данные отправлены:", testData);
+        // Функция для проверки загрузки CloudPayments
+        function checkCloudPayments() {
+            if (typeof cp !== 'undefined') {
+                pay();
+            } else {
+                setTimeout(checkCloudPayments, 100); // проверяем каждые 100мс
+            }
         }
         
-        // Автоматически запускаем оплату при загрузке страницы
-        window.onload = function() {
-            console.log("Начало процесса оплаты...");
+        function pay() {
             try {
                 var widget = new cp.CloudPayments();
                 widget.pay('charge',
@@ -103,43 +78,32 @@
                     },
                     {
                         onSuccess: function (options) {
-                            console.log("Оплата успешна, отправка данных в бот...");
-                            const paymentData = {
+                            alert('Оплата успешно завершена! ID транзакции: ' + options.invoiceId);
+                            window.Telegram.WebApp.sendData(JSON.stringify({
                                 status: 'success',
-                                invoiceId: options.invoiceId,
-                                amount: 990,
-                                currency: 'RUB'
-                            };
-                            console.log("Отправляемые данные:", paymentData);
-                            tg.sendData(JSON.stringify(paymentData));
-                            console.log("Данные отправлены в бот");
+                                invoiceId: options.invoiceId
+                            }));
                         },
                         onFail: function (reason, options) {
-                            console.log("Ошибка оплаты, отправка данных об ошибке...");
-                            const errorData = {
+                            alert('Ошибка оплаты: ' + reason);
+                            window.Telegram.WebApp.sendData(JSON.stringify({
                                 status: 'failed',
                                 reason: reason
-                            };
-                            console.log("Отправляемые данные об ошибке:", errorData);
-                            tg.sendData(JSON.stringify(errorData));
-                            console.log("Данные об ошибке отправлены");
+                            }));
                         },
                         onComplete: function (paymentResult, options) {
-                            console.log("Платеж завершен:", paymentResult);
+                            //Вызывается как только виджет получает от api.cloudpayments ответ с результатом транзакции.
+                            //например вызов вашей аналитики
                         }
                     }
                 )
             } catch (error) {
-                console.error("Ошибка при инициализации оплаты:", error);
-                const errorData = {
-                    status: 'failed',
-                    reason: error.message
-                };
-                console.log("Отправка данных об ошибке:", errorData);
-                tg.sendData(JSON.stringify(errorData));
-                console.log("Данные об ошибке отправлены");
+                alert('Ошибка при инициализации оплаты: ' + error.message);
             }
-        }
+        };
+
+        // Запускаем проверку после загрузки страницы
+        window.addEventListener('load', checkCloudPayments);
     </script>
 </body>
 </html> 
