@@ -68,12 +68,6 @@
 
     <script>
         let tg = window.Telegram.WebApp;
-        
-        // Получаем hit_id из URL параметров
-        const urlParams = new URLSearchParams(window.location.search);
-        const hit_id = urlParams.get('hit_id');
-        
-        console.log("Hit ID:", hit_id);
 
         // Инициализация WebApp
         tg.ready();
@@ -84,14 +78,14 @@
             console.log("Отправка тестовых данных...");
             const testData = {
                 status: 'test',
-                message: 'Тестовая отправка данных',
-                hit_id: hit_id
+                message: 'Тестовая отправка данных'
             };
             tg.sendData(JSON.stringify(testData));
             console.log("Тестовые данные отправлены:", testData);
         }
         
-        function pay() {
+        // Автоматически запускаем оплату при загрузке страницы
+        window.onload = function() {
             console.log("Начало процесса оплаты...");
             try {
                 var widget = new cp.CloudPayments();
@@ -114,8 +108,7 @@
                                 status: 'success',
                                 invoiceId: options.invoiceId,
                                 amount: 990,
-                                currency: 'RUB',
-                                hit_id: hit_id
+                                currency: 'RUB'
                             };
                             console.log("Отправляемые данные:", paymentData);
                             tg.sendData(JSON.stringify(paymentData));
@@ -125,8 +118,7 @@
                             console.log("Ошибка оплаты, отправка данных об ошибке...");
                             const errorData = {
                                 status: 'failed',
-                                reason: reason,
-                                hit_id: hit_id
+                                reason: reason
                             };
                             console.log("Отправляемые данные об ошибке:", errorData);
                             tg.sendData(JSON.stringify(errorData));
@@ -141,8 +133,7 @@
                 console.error("Ошибка при инициализации оплаты:", error);
                 const errorData = {
                     status: 'failed',
-                    reason: error.message,
-                    hit_id: hit_id
+                    reason: error.message
                 };
                 console.log("Отправка данных об ошибке:", errorData);
                 tg.sendData(JSON.stringify(errorData));
