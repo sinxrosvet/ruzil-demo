@@ -69,7 +69,7 @@
                         publicId: 'test_api_00000000000000000000001',
                         description: tg.initDataUnsafe.start_param === 'landing' ? 
                             'Оплата за Разбор Лендинга' : 'Оплата за разбор стратегических сессий',
-                        amount: 990,
+                        amount: tg.initDataUnsafe.start_param === 'landing' ? 3000 : 20000,
                         currency: 'RUB',
                         invoiceId: new Date().getTime(),
                         skin: "modern",
