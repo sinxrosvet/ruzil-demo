@@ -12,18 +12,19 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: var(--tg-theme-bg-color, #f5f5f5);
+            color: var(--tg-theme-text-color, #000000);
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
-            background: white;
+            background: var(--tg-theme-secondary-bg-color, white);
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .button {
-            background-color: #0088cc;
+            background-color: #2cab37;
             color: white;
             border: none;
             padding: 12px 20px;
@@ -36,30 +37,30 @@
         .price {
             font-size: 24px;
             font-weight: bold;
-            color: #333;
+            color: var(--tg-theme-text-color, #333);
             text-align: center;
             margin: 20px 0;
         }
         .description {
-            color: #666;
+            color: var(--tg-theme-hint-color, #666);
             text-align: center;
             margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <div class="price">990 ₽</div>
+        <div class="description">Доступ к результатам анализа</div>
+        <button class="button" onclick="pay()">Оплатить</button>
+    </div>
+
     <script>
         let tg = window.Telegram.WebApp;
+
+        // Инициализация WebApp
+        tg.ready();
         tg.expand();
-        
-        // Функция для проверки загрузки CloudPayments
-        function checkCloudPayments() {
-            if (typeof cp !== 'undefined') {
-                pay();
-            } else {
-                setTimeout(checkCloudPayments, 100); // проверяем каждые 100мс
-            }
-        }
         
         function pay() {
             try {
@@ -78,22 +79,24 @@
                     },
                     {
                         onSuccess: function (options) {
-                            // Отправляем данные в Telegram без alert
-                            window.Telegram.WebApp.sendData(JSON.stringify({
+                            // Отправляем данные в Telegram
+                            tg.sendData(JSON.stringify({
                                 status: 'success',
-                                invoiceId: options.invoiceId
+                                invoiceId: options.invoiceId,
+                                amount: 990,
+                                currency: 'RUB'
                             }));
                             // Закрываем WebApp
-                            window.Telegram.WebApp.close();
+                            tg.close();
                         },
                         onFail: function (reason, options) {
-                            // Отправляем информацию об ошибке без alert
-                            window.Telegram.WebApp.sendData(JSON.stringify({
+                            // Отправляем информацию об ошибке
+                            tg.sendData(JSON.stringify({
                                 status: 'failed',
                                 reason: reason
                             }));
                             // Закрываем WebApp
-                            window.Telegram.WebApp.close();
+                            tg.close();
                         },
                         onComplete: function (paymentResult, options) {
                             //Вызывается как только виджет получает от api.cloudpayments ответ с результатом транзакции.
@@ -102,18 +105,15 @@
                     }
                 )
             } catch (error) {
-                // Отправляем информацию об ошибке инициализации без alert
-                window.Telegram.WebApp.sendData(JSON.stringify({
+                // Отправляем информацию об ошибке инициализации
+                tg.sendData(JSON.stringify({
                     status: 'failed',
                     reason: error.message
                 }));
                 // Закрываем WebApp
-                window.Telegram.WebApp.close();
+                tg.close();
             }
-        };
-
-        // Запускаем проверку после загрузки страницы
-        window.addEventListener('load', checkCloudPayments);
+        }
     </script>
 </body>
 </html> 
