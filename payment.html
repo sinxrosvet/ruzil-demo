@@ -34,6 +34,16 @@
             font-size: 16px;
             margin-top: 20px;
         }
+        .test-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+        }
         .price {
             font-size: 24px;
             font-weight: bold;
@@ -53,16 +63,36 @@
         <div class="price">990 ₽</div>
         <div class="description">Доступ к результатам анализа</div>
         <button class="button" onclick="pay()">Оплатить</button>
+        <button class="test-button" onclick="sendTestData()">Тест отправки данных</button>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
+        
+        // Получаем hit_id из URL параметров
+        const urlParams = new URLSearchParams(window.location.search);
+        const hit_id = urlParams.get('hit_id');
+        
+        console.log("Hit ID:", hit_id);
 
         // Инициализация WebApp
         tg.ready();
         tg.expand();
         
+        // Функция для тестовой отправки данных
+        function sendTestData() {
+            console.log("Отправка тестовых данных...");
+            const testData = {
+                status: 'test',
+                message: 'Тестовая отправка данных',
+                hit_id: hit_id
+            };
+            tg.sendData(JSON.stringify(testData));
+            console.log("Тестовые данные отправлены:", testData);
+        }
+        
         function pay() {
+            console.log("Начало процесса оплаты...");
             try {
                 var widget = new cp.CloudPayments();
                 widget.pay('charge',
@@ -79,39 +109,44 @@
                     },
                     {
                         onSuccess: function (options) {
-                            // Отправляем данные в Telegram
-                            tg.sendData(JSON.stringify({
+                            console.log("Оплата успешна, отправка данных в бот...");
+                            const paymentData = {
                                 status: 'success',
                                 invoiceId: options.invoiceId,
                                 amount: 990,
-                                currency: 'RUB'
-                            }));
-                            // Закрываем WebApp
-                            tg.close();
+                                currency: 'RUB',
+                                hit_id: hit_id
+                            };
+                            console.log("Отправляемые данные:", paymentData);
+                            tg.sendData(JSON.stringify(paymentData));
+                            console.log("Данные отправлены в бот");
                         },
                         onFail: function (reason, options) {
-                            // Отправляем информацию об ошибке
-                            tg.sendData(JSON.stringify({
+                            console.log("Ошибка оплаты, отправка данных об ошибке...");
+                            const errorData = {
                                 status: 'failed',
-                                reason: reason
-                            }));
-                            // Закрываем WebApp
-                            tg.close();
+                                reason: reason,
+                                hit_id: hit_id
+                            };
+                            console.log("Отправляемые данные об ошибке:", errorData);
+                            tg.sendData(JSON.stringify(errorData));
+                            console.log("Данные об ошибке отправлены");
                         },
                         onComplete: function (paymentResult, options) {
-                            //Вызывается как только виджет получает от api.cloudpayments ответ с результатом транзакции.
-                            //например вызов вашей аналитики
+                            console.log("Платеж завершен:", paymentResult);
                         }
                     }
                 )
             } catch (error) {
-                // Отправляем информацию об ошибке инициализации
-                tg.sendData(JSON.stringify({
+                console.error("Ошибка при инициализации оплаты:", error);
+                const errorData = {
                     status: 'failed',
-                    reason: error.message
-                }));
-                // Закрываем WebApp
-                tg.close();
+                    reason: error.message,
+                    hit_id: hit_id
+                };
+                console.log("Отправка данных об ошибке:", errorData);
+                tg.sendData(JSON.stringify(errorData));
+                console.log("Данные об ошибке отправлены");
             }
         }
     </script>
