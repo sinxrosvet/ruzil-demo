@@ -78,18 +78,22 @@
                     },
                     {
                         onSuccess: function (options) {
-                            alert('Оплата успешно завершена! ID транзакции: ' + options.invoiceId);
+                            // Отправляем данные в Telegram без alert
                             window.Telegram.WebApp.sendData(JSON.stringify({
                                 status: 'success',
                                 invoiceId: options.invoiceId
                             }));
+                            // Закрываем WebApp
+                            window.Telegram.WebApp.close();
                         },
                         onFail: function (reason, options) {
-                            alert('Ошибка оплаты: ' + reason);
+                            // Отправляем информацию об ошибке без alert
                             window.Telegram.WebApp.sendData(JSON.stringify({
                                 status: 'failed',
                                 reason: reason
                             }));
+                            // Закрываем WebApp
+                            window.Telegram.WebApp.close();
                         },
                         onComplete: function (paymentResult, options) {
                             //Вызывается как только виджет получает от api.cloudpayments ответ с результатом транзакции.
@@ -98,7 +102,13 @@
                     }
                 )
             } catch (error) {
-                alert('Ошибка при инициализации оплаты: ' + error.message);
+                // Отправляем информацию об ошибке инициализации без alert
+                window.Telegram.WebApp.sendData(JSON.stringify({
+                    status: 'failed',
+                    reason: error.message
+                }));
+                // Закрываем WebApp
+                window.Telegram.WebApp.close();
             }
         };
 
