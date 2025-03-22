@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Научный Калькулятор</title>
+    <title>Калькулятор</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -82,48 +82,96 @@
         }
 
         button {
-            padding: 20px;
-            font-size: 20px;
+            width: 100%;
+            height: 50px;
             border: none;
             border-radius: 15px;
+            font-size: 20px;
+            color: white;
             background: linear-gradient(-30deg, #001f3f 50%, #00152b 50%);
-            color: #fff;
             cursor: pointer;
-            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
             border: 1px solid rgba(0, 255, 255, 0.1);
         }
 
-        button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-        }
-
-        button::before {
-            content: '';
+        button span {
             position: absolute;
-            inset: -3px;
-            background: conic-gradient(
-                from 0deg,
-                transparent 0%,
-                currentColor 20%,
-                currentColor 40%,
-                transparent 60%
-            );
-            border-radius: 15px;
-            animation: rotate 2s linear infinite;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            pointer-events: none;
+            opacity: 0.7;
         }
 
-        button:hover::before {
-            opacity: 1;
+        button span:nth-child(1) {
+            --direction: left;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to var(--direction), rgba(0, 204, 255, 0), #00ccff);
+            animation: 2s animateTop linear infinite;
+        }
+
+        button span:nth-child(2) {
+            --direction: top;
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 2px;
+            background: linear-gradient(to var(--direction), rgba(0, 204, 255, 0), #00ccff);
+            animation: 2s animateRight linear infinite;
+        }
+
+        button span:nth-child(3) {
+            --direction: right;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to var(--direction), rgba(0, 204, 255, 0), #00ccff);
+            animation: 2s animateBottom linear infinite;
+        }
+
+        button span:nth-child(4) {
+            --direction: bottom;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 2px;
+            background: linear-gradient(to var(--direction), rgba(0, 204, 255, 0), #00ccff);
+            animation: 2s animateLeft linear infinite;
+        }
+
+        @keyframes animateTop {
+            0% { transform: translateX(-100%); opacity: 0; }
+            50% { transform: translateX(0); opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
+        }
+
+        @keyframes animateRight {
+            0% { transform: translateY(-100%); opacity: 0; }
+            50% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(100%); opacity: 0; }
+        }
+
+        @keyframes animateBottom {
+            0% { transform: translateX(100%); opacity: 0; }
+            50% { transform: translateX(0); opacity: 1; }
+            100% { transform: translateX(-100%); opacity: 0; }
+        }
+
+        @keyframes animateLeft {
+            0% { transform: translateY(100%); opacity: 0; }
+            50% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-100%); opacity: 0; }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         .operator {
             background: linear-gradient(-30deg, #0088cc 50%, #0077b3 50%);
-            color: #fff;
         }
 
         .equals {
@@ -133,33 +181,9 @@
 
         .clear {
             background: linear-gradient(-30deg, #330000 50%, #1a0000 50%);
-            color: #fff;
         }
 
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes pulseGlow {
-            0% {
-                box-shadow: 
-                    0 0 30px rgba(0, 204, 255, 0.5),
-                    0 0 60px rgba(0, 204, 255, 0.2);
-            }
-            50% {
-                box-shadow: 
-                    0 0 40px rgba(0, 204, 255, 0.8),
-                    0 0 80px rgba(0, 204, 255, 0.3);
-            }
-            100% {
-                box-shadow: 
-                    0 0 30px rgba(0, 204, 255, 0.5),
-                    0 0 60px rgba(0, 204, 255, 0.2);
-            }
-        }
-
-        .calculator h2 {
+        h2 {
             font-size: 24px;
             margin-bottom: 20px;
             color: #25F4EE;
@@ -187,32 +211,89 @@
 </head>
 <body>
     <div class="calculator">
-        <h2>✨ Научный калькулятор</h2>
+        <h2>✨ Калькулятор</h2>
         <input type="text" id="display" readonly>
         <div class="buttons">
-            <button class="clear" onclick="clearDisplay()">C</button>
-            <button class="operator" onclick="addToDisplay('(')">(</button>
-            <button class="operator" onclick="addToDisplay(')')">)</button>
-            <button class="operator" onclick="addToDisplay('/')">/</button>
+            <button class="clear" onclick="clearDisplay()">
+                <span></span><span></span><span></span><span></span>
+                C
+            </button>
+            <button class="operator" onclick="addToDisplay('(')">
+                <span></span><span></span><span></span><span></span>
+                (
+            </button>
+            <button class="operator" onclick="addToDisplay(')')">
+                <span></span><span></span><span></span><span></span>
+                )
+            </button>
+            <button class="operator" onclick="addToDisplay('/')">
+                <span></span><span></span><span></span><span></span>
+                /
+            </button>
             
-            <button onclick="addToDisplay('7')">7</button>
-            <button onclick="addToDisplay('8')">8</button>
-            <button onclick="addToDisplay('9')">9</button>
-            <button class="operator" onclick="addToDisplay('*')">×</button>
+            <button onclick="addToDisplay('7')">
+                <span></span><span></span><span></span><span></span>
+                7
+            </button>
+            <button onclick="addToDisplay('8')">
+                <span></span><span></span><span></span><span></span>
+                8
+            </button>
+            <button onclick="addToDisplay('9')">
+                <span></span><span></span><span></span><span></span>
+                9
+            </button>
+            <button class="operator" onclick="addToDisplay('*')">
+                <span></span><span></span><span></span><span></span>
+                ×
+            </button>
             
-            <button onclick="addToDisplay('4')">4</button>
-            <button onclick="addToDisplay('5')">5</button>
-            <button onclick="addToDisplay('6')">6</button>
-            <button class="operator" onclick="addToDisplay('-')">-</button>
+            <button onclick="addToDisplay('4')">
+                <span></span><span></span><span></span><span></span>
+                4
+            </button>
+            <button onclick="addToDisplay('5')">
+                <span></span><span></span><span></span><span></span>
+                5
+            </button>
+            <button onclick="addToDisplay('6')">
+                <span></span><span></span><span></span><span></span>
+                6
+            </button>
+            <button class="operator" onclick="addToDisplay('-')">
+                <span></span><span></span><span></span><span></span>
+                -
+            </button>
             
-            <button onclick="addToDisplay('1')">1</button>
-            <button onclick="addToDisplay('2')">2</button>
-            <button onclick="addToDisplay('3')">3</button>
-            <button class="operator" onclick="addToDisplay('+')">+</button>
+            <button onclick="addToDisplay('1')">
+                <span></span><span></span><span></span><span></span>
+                1
+            </button>
+            <button onclick="addToDisplay('2')">
+                <span></span><span></span><span></span><span></span>
+                2
+            </button>
+            <button onclick="addToDisplay('3')">
+                <span></span><span></span><span></span><span></span>
+                3
+            </button>
+            <button class="operator" onclick="addToDisplay('+')">
+                <span></span><span></span><span></span><span></span>
+                +
+            </button>
             
-            <button onclick="addToDisplay('0')">0</button>
-            <button onclick="addToDisplay('.')">.</button>
-            <button class="equals" onclick="calculate()">=</button>
+            <button onclick="addToDisplay('0')">
+                <span></span><span></span><span></span><span></span>
+                0
+            </button>
+            <button onclick="addToDisplay('.')">
+                <span></span><span></span><span></span><span></span>
+                .
+            </button>
+            <button class="equals" onclick="calculate()">
+                <span></span><span></span><span></span><span></span>
+                =
+            </button>
         </div>
     </div>
 
@@ -225,42 +306,20 @@
 
         function addToDisplay(value) {
             display.value += value;
-            createRippleEffect(event.target);
         }
 
         function clearDisplay() {
             display.value = '';
-            createRippleEffect(event.target);
         }
 
         function calculate() {
             try {
                 display.value = eval(display.value);
-                createRippleEffect(event.target);
             } catch (error) {
                 display.value = 'Ошибка';
             }
         }
 
-        function createRippleEffect(button) {
-            const ripple = document.createElement('div');
-            ripple.className = 'ripple';
-            
-            const rect = button.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            
-            ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = event.clientX - rect.left - size/2 + 'px';
-            ripple.style.top = event.clientY - rect.top - size/2 + 'px';
-            
-            button.appendChild(ripple);
-            
-            ripple.addEventListener('animationend', () => {
-                ripple.remove();
-            });
-        }
-
-        // Prevent keyboard input for security
         display.addEventListener('keydown', (e) => {
             e.preventDefault();
         });
